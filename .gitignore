@@ -1,0 +1,15 @@
+node_modules
+.env
+repositoryMap.json
+database.js
+*.log
+data
+.DS_Store
+/vendor
+/customFlowQuestions.json
+/.idea
+.vscode
+/customTests.json
+/eslint.config.mjs
+/.prettierignore
+/.prettierrc
