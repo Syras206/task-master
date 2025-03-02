@@ -3,7 +3,8 @@ const { Quizzer, Questioner } = require("terminal-quizzer")
 
 class flowQuestions {
 	stages = {
-		askCustomQuestions: () => this.stageAskCustomQuestions(), complete: () => this.stageComplete(),
+		askCustomQuestions: () => this.stageAskCustomQuestions(),
+		complete: () => this.stageComplete(),
 	}
 
 	constructor() {
