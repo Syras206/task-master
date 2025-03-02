@@ -74,8 +74,8 @@ class pullRequest {
 	}
 
 	/**
-     * Sets up the pull request details based on user input.
-     */
+	 * Sets up the pull request details based on user input.
+	 */
 	async createPullRequest() {
 		let self = this
 		let authentication = process.env.BITBUCKET_PR_USERNAME + ":" + process.env.BITBUCKET_PR_APP_PASSWORD
