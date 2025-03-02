@@ -22,35 +22,20 @@ Before you begin, ensure you have met the following requirements:
 ## Installation
 
 1. Clone the repository:
-```
-git clone https://github.com/your-username/task-master.git
-cd task-master
-```
-
+    ```
+    git clone https://github.com/your-username/task-master.git
+    cd task-master
+    ```
+   
 2. Install the dependencies:
-```
-npm install
-```
+    ```
+    npm install
+    ```
 
-3. Create a `.env` file in the project root and add the following environment variables:
-```
-BITBUCKET_PR_USERNAME=your_bitbucket_username
-BITBUCKET_PR_APP_PASSWORD=your_bitbucket_app_password
-GIT_PROJECT_DIR=/path/to/your/git/projects/:system:
-BITBUCKET_ACCOUNT_NAME=your_bitbucket_account_name
-TASK_DB=dbName
-MODE=local
-```
-   Replace the values with your actual Bitbucket credentials and project paths.
-
-4. Create a `repositoryMap.json` file in the project root with the following structure:
-```json
-{
-  "main": "my-main-repo",
-  "foo": "my-foo-repo"
-}
-```
-Replace the keys and values with your actual system names and corresponding Bitbucket repository names.
+3. Run the install script, which will guide you through the installation in order to add the necessary files.
+    ```
+    npm run install
+    ```
 
 ## Usage
 

@@ -1,9 +1,10 @@
 {
 	"name": "task-master",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "PR creator",
 	"main": "taskBuilder.js",
 	"scripts": {
+		"install": "node install.js",
 		"tasks": "node taskBuilder.js",
 		"pr": "node prBuilder.js",
 		"test": "master test"
