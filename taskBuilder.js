@@ -4,7 +4,7 @@ const branchQuestions = require("./branchQuestions");
 const taskQuestions = require("./taskQuestions");
 
 const slimDB = require("@syrasco/slim-db/slimDB");
-const db = new slimDB("./data", process.env.TASK_DB, process.env.MODE);
+const db = new slimDB("./data", process.env.TASK_DB_KEY, process.env.MODE);
 const { Questioner } = require("terminal-quizzer");
 
 /**

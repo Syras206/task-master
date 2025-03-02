@@ -2,7 +2,7 @@ const { Quizzer, Questioner } = require("terminal-quizzer")
 const fs = require("fs")
 
 const slimDB = require("@syrasco/slim-db/slimDB")
-const db = new slimDB("./data", process.env.TASK_DB, process.env.MODE)
+const db = new slimDB("./data", process.env.TASK_DB_KEY, process.env.MODE)
 
 class taskQuestions {
 	questioner = new Questioner()

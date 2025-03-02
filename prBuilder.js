@@ -6,7 +6,7 @@ const prQuestions = require("./prQuestions")
 const setupQuestions = require("./setupQuestions")
 
 const slimDB = require("@syrasco/slim-db/slimDB")
-const db = new slimDB("./data", process.env.TASK_DB, process.env.MODE)
+const db = new slimDB("./data", process.env.TASK_DB_KEY, process.env.MODE)
 
 /**
  * Represents a pull request and manages the process of creating one.
