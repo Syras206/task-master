@@ -161,7 +161,7 @@ class taskBuilder {
  * - GIT_PROJECT_DIR -- this includes a :system: wildcard pointing to your git
  *   project directory in the format: /path/to/your/project/:system:
  * - MODE -- determines whether the DB is encrypted (production) or not (local)
- * - TASK_DB -- the db file name
+ * - TASK_DB_KEY -- the encryption key for the DB
  */
 if (process.argv[2] === "list") {
 	let tasks = [];
