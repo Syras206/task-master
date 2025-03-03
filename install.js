@@ -33,8 +33,8 @@ class install {
 	}
 
 	createEnvFile() {
-		const envFileContent = `BITBUCKET_USERNAME=${this.bitbucketUsername}\n`
-			+ `BITBUCKET_APP_PASSWORD=${this.bitbucketAppPassword}\n`
+		const envFileContent = `BITBUCKET_PR_USERNAME=${this.bitbucketUsername}\n`
+			+ `BITBUCKET_PR_APP_PASSWORD=${this.bitbucketAppPassword}\n`
 			+ `BITBUCKET_ACCOUNT_NAME=${this.bitbucketAccountName}\n`
 			+ `GIT_PROJECT_DIR=${this.projectDirectory}\n`
 			+ `MODE=${this.mode}\n`
