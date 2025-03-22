@@ -6,6 +6,8 @@ const prQuestions = require("./prQuestions")
 const setupQuestions = require("./setupQuestions")
 
 const slimDB = require("@syrasco/slim-db/slimDB")
+const Table = require("./UI/table")
+const Colours = require("./UI/colours")
 const db = new slimDB("./data", process.env.TASK_DB_KEY, process.env.MODE)
 
 /**
@@ -18,12 +20,6 @@ const db = new slimDB("./data", process.env.TASK_DB_KEY, process.env.MODE)
  * - Managing the flow of questions for PR creation
  */
 class pullRequest {
-	// Colour codes for console output
-	NORMAL = "\x1b[0m"
-	YELLOW = "\x1b[33;01m"
-	GREEN = "\x1b[32;01m"
-	CYAN = "\x1b[0;36m"
-	RED = "\x1b[0;31m"
 
 	// core variables which will be populated on instantiation
 	system = null
@@ -63,10 +59,10 @@ class pullRequest {
 		return new Promise((resolve, reject) => {
 			exec(bashCommand, (error) => {
 				if (error) {
-					reject(`${this.RED}This branch does not exist in ${this.system}${this.NORMAL}\n`)
+					reject(`${Colours.RED}This branch does not exist in ${this.system}${Colours.NORMAL}\n`)
 				} else {
 					// branch exists
-					console.log(`✔️ [${this.YELLOW}${this.branch}${this.NORMAL}] Valid branch name in ${this.system}\n`)
+					console.log(`✔️ [${Colours.YELLOW}${this.branch}${Colours.NORMAL}] Valid branch name in ${this.system}\n`)
 					resolve(true)
 				}
 			})
@@ -94,12 +90,12 @@ class pullRequest {
 			.then((response) => {
 				if (response.ok) return response.json()
 				console.log(`Response: ${response.status} ${response.statusText}`)
-				throw new Error(`${this.RED}Failed to create pull request in ${this.system}${this.NORMAL}\n`)
+				throw new Error(`${Colours.RED}Failed to create pull request in ${this.system}${Colours.NORMAL}\n`)
 			})
 			.then((json) => {
-				console.log(`${self.GREEN}PR successfully created${self.NORMAL}\n`)
-				console.log(`${self.CYAN}PR ID: ${json.id}${self.NORMAL}`)
-				console.log(`${self.CYAN}PR URL: ${json.links.html.href}${self.NORMAL}`)
+				console.log(`${Colours.GREEN}PR successfully created${Colours.NORMAL}\n`)
+				console.log(`${Colours.CYAN}PR ID: ${json.id}${Colours.NORMAL}`)
+				console.log(`${Colours.CYAN}PR URL: ${json.links.html.href}${Colours.NORMAL}`)
 
 				// delete the task
 				if (self.taskId) {
@@ -193,7 +189,7 @@ class pullRequest {
 		this.system = this.system.toLowerCase()
 		// either return the repository name or throw an error
 		if (!(this.system in repositories)) {
-			throw new Error(`${this.RED}This repository has not been defined for ${this.system}${this.NORMAL}\n`)
+			throw new Error(`${Colours.RED}This repository has not been defined for ${this.system}${Colours.NORMAL}\n`)
 		} else {
 			return repositories[this.system]
 		}
@@ -254,13 +250,24 @@ if (!process.argv[2]) {
 		.finally(() => {
 			if (tasksToRun) {
 				console.log(`${tasksToRunString}`)
-				let taskTable = tasks.map((task) => {
-					return {
-						branch: task.branch, system: task.system, summary: task.summary,
-					}
-				})
-				// list the tasks to run
-				console.table(taskTable)
+
+				// list the tasks to run in a table
+				new Table()
+					.setColumns([
+						{ name: "id", label: "ID", width: 4, color: Colours.GREEN },
+						{ name: "branch", label: "Branch", width: 60 },
+						{ name: "system", label: "System", width: 15 },
+						{ name: "summary", label: "Summary", width: 100 },
+					])
+					.setRows(tasks.map((task, i) => ({
+						id: i,
+						branch: task.branch,
+						system: task.system,
+						summary: task.summary,
+					})))
+					.setColour(Colours.GREEN)
+					.render()
+
 				// ask for the number of the task to run
 				const readline = require("readline")
 				let rl = readline.createInterface({

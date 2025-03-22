@@ -6,6 +6,8 @@ const taskQuestions = require("./taskQuestions");
 const slimDB = require("@syrasco/slim-db/slimDB");
 const db = new slimDB("./data", process.env.TASK_DB_KEY, process.env.MODE);
 const { Questioner } = require("terminal-quizzer");
+const Table = require("./UI/table")
+const Colours = require("./UI/colours")
 
 /**
  * Represents a task builder and manages the process of creating a new task.
@@ -179,15 +181,22 @@ if (process.argv[2] === "list") {
 		.finally(() => {
 			if (tasksToRun) {
 				console.log(`${tasksToRunString}`);
-				let taskTable = tasks.map((task) => {
-					return {
+
+				new Table()
+					.setColumns([
+						{ name: "id", label: "ID", width: 4, color: Colours.GRAY },
+						{ name: "branch", label: "Branch", width: 60 },
+						{ name: "system", label: "System", width: 15 },
+						{ name: "summary", label: "Summary", width: 100 },
+					])
+					.setRows(tasks.map((task, i) => ({
+						id: i,
 						branch: task.branch,
 						system: task.system,
 						summary: task.summary,
-					};
-				});
-				// list the tasks to run
-				console.table(taskTable);
+					})))
+					.setColour(Colours.CYAN)
+					.render()
 
 				let questioner = new Questioner();
 				questioner
