@@ -134,6 +134,72 @@ class taskBuilder {
 	}
 }
 
+function askQuestions(taskToView) {
+	let questioner = new Questioner()
+	let instance = new taskBuilder(taskToView.system)
+	questioner
+		.showMenu(
+			`What would you like to do with this task?`,
+			{
+				'V': 'View task',
+				'S': 'Switch to task',
+				'D': 'Delete task'
+			},
+			taskToView.branch
+		)
+		.then((answer) => {
+			switch (answer) {
+				case "V":
+					console.log(`\nAction plan:`)
+					console.log(
+						`${questioner.CYAN}${taskToView.plan}${questioner.NORMAL}`,
+					)
+					process.exit(1)
+					break
+				case "S":
+					// stash and switch to the branch
+					console.log(
+						`stashing changes and switching to the ${taskToView.branch} branch\n`,
+					)
+					exec(
+						`cd ${instance.gitProjectDirectory} && git stash`,
+					)
+					exec(
+						`cd ${instance.gitProjectDirectory} && git checkout ${taskToView.branch}`,
+					)
+					console.log(
+						`cd ${instance.gitProjectDirectory} && git checkout ${taskToView.branch}`,
+					)
+					// view the task plan
+					console.log(`\nAction plan:`)
+					console.log(
+						`${questioner.CYAN}${taskToView.plan}${questioner.NORMAL}`,
+					)
+					process.exit(1)
+					break
+				case "D":
+					questioner.showYesNoMenu('Are you sure you want to delete this task?')
+						.then((answer) => {
+							if (answer === 'y') {
+								db.deleteData("tasks", {
+									id: taskToView.id,
+								}).then(() => process.exit(1))
+							} else {
+								`${questioner.RED}Exiting${questioner.NORMAL}`,
+								process.exit(1)
+							}
+						})
+					break
+
+				default:
+					console.log(
+						`${questioner.RED}Unknown command. Exiting${questioner.NORMAL}`,
+					)
+					process.exit(1)
+			}
+		})
+}
+
 /**
  * Command-line interface for creating pull requests tasks and storing them in
  * the DB, or interacting with tasks stored in the DB.
