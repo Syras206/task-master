@@ -72,7 +72,7 @@ class install {
 			`${this.questioner.RED}Database:${this.questioner.NORMAL}`,
 		)
 		this.questioner
-			.askQuestion("Do you want to encrypt the database? [y/n]")
+			.showYesNoMenu("Do you want to encrypt the database?")
 			.then(async (answer) => {
 				const mode = answer === "y"
 					? "production"

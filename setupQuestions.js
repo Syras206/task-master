@@ -48,7 +48,7 @@ class setupQuestions {
 		let self = this
 
 		this.questioner
-			.askQuestion("Do tests need to be run now? [y/n]")
+			.showYesNoMenu("Do tests need to be run now?")
 			.then((answer) => {
 				if (answer === "y") {
 					self.runTesting = "y"

@@ -37,7 +37,7 @@ class runTests {
 			if (test?.length > 0) {
 				// ask for the test
 				this.questioner
-					.askQuestion(`Run '${test}'? ${this.questioner.CYAN} [y/n]:`)
+					.showYesNoMenu(`Run '${test}'? ${this.questioner.CYAN}`)
 					.then((answer) => {
 						if (answer === "y") self.runTest(test)
 						self.runNextTest(tests)

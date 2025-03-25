@@ -82,7 +82,7 @@ class prQuestions {
 
 		console.log(`${this.questioner.RED}Dependencies:${this.questioner.NORMAL}`)
 		this.questioner
-			.askQuestion("Has the target branch been merged into the branch? [y/n]")
+			.showYesNoMenu("Has the target branch been merged into the branch?")
 			.then((answer) => {
 				if (answer === "y") {
 					self.branchMerged = "\t**Yes**"
@@ -144,7 +144,7 @@ class prQuestions {
 		console.log(`${this.questioner.RED}Bug Fix:${this.questioner.NORMAL}`)
 
 		this.questioner
-			.askQuestion(`Is this a bug fix? [y/n]`)
+			.showYesNoMenu(`Is this a bug fix?`)
 			.then((answer) => {
 				if (answer === "y") {
 					self.isBugFix = true
@@ -160,7 +160,7 @@ class prQuestions {
 		let self = this
 
 		this.questioner
-			.askQuestion("Are there any other PRs for other systems, e.g. My? [y/n]")
+			.showYesNoMenu("Are there any other PRs for other systems, e.g. My?")
 			.then((answer) => {
 				if (answer === "y") {
 					self.otherPrs = "\t**Yes**\n"
@@ -232,7 +232,7 @@ class prQuestions {
 		let self = this
 
 		this.questioner
-			.askQuestion("Included SQL updates? [y/n]")
+			.showYesNoMenu("Included SQL updates?")
 			.then((answer) => {
 				if (answer === "y") {
 					self.sqlUpdates = "\t**Yes**"
@@ -248,7 +248,7 @@ class prQuestions {
 		let self = this
 
 		this.questioner
-			.askQuestion("Is this pull request linked to a support ticket? [y/n]")
+			.showYesNoMenu("Is this pull request linked to a support ticket?")
 			.then((answer) => {
 				if (answer === "y") {
 					self.supportTicket = "\t**Yes**\n"
@@ -284,7 +284,7 @@ class prQuestions {
 		let self = this
 
 		this.questioner
-			.askQuestion("Does this add/edit/remove any translations? [y/n]")
+			.showYesNoMenu("Does this add/edit/remove any translations?")
 			.then((answer) => {
 				if (answer === "y") {
 					self.translations = "\t**Yes**"

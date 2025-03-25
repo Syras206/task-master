@@ -105,7 +105,7 @@ class taskQuestions {
 		let self = this
 
 		this.questioner
-			.askQuestion(`Are there any existing patterns for what you are trying to achieve in this task? i.e. Has this been done before? [y/n]`)
+			.showYesNoMenu(`Are there any existing patterns for what you are trying to achieve in this task? i.e. Has this been done before?`)
 			.then((answer) => {
 				if (answer === "y") {
 					this.questioner
