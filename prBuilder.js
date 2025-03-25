@@ -6,8 +6,8 @@ const prQuestions = require("./prQuestions")
 const setupQuestions = require("./setupQuestions")
 
 const slimDB = require("@syrasco/slim-db/slimDB")
-const Table = require("./UI/table")
 const Colours = require("./UI/colours")
+const { Questioner } = require("terminal-quizzer")
 const db = new slimDB("./data", process.env.TASK_DB_KEY, process.env.MODE)
 
 /**
@@ -196,6 +196,20 @@ class pullRequest {
 	}
 }
 
+function runTask(taskToRun) {
+	let pr = new pullRequest(taskToRun.system, taskToRun.branch)
+	// set the task id so we can reference it when within the class
+	pr.taskId = `${taskToRun.id}`
+	// patch in the task plan to the solution if it's not empty
+	let solution = taskToRun.plan?.length > 0 ? taskToRun.solution + "\n**Actions followed:**\n\n" + taskToRun.plan : taskToRun.solution
+	// instantiate the prQuestions class
+	pr.prQuestions = new prQuestions({
+		purposeSummary: taskToRun.summary, purposeProblem: taskToRun.problem, purposeSolution: solution,
+	})
+	// init the pullRequest class
+	pr.init()
+}
+
 /**
  * Command-line interface for creating pull requests using tasks stored in the DB, or manually creating a PR if the
  * branch name is supplied as an argument.
@@ -250,44 +264,23 @@ if (!process.argv[2]) {
 		.finally(() => {
 			if (tasksToRun) {
 				console.log(`${tasksToRunString}`)
+				let rows = tasks.map((task, i) => ({
+					id: i,
+					branch: task.branch,
+					system: task.system,
+					summary: task.summary,
+				}))
+				let columns = [
+					{name: "branch", label: "Branch", width: 70},
+					{name: "system", label: "System", width: 15},
+					{name: "summary", label: "Summary", width: 110},
+				]
 
-				// list the tasks to run in a table
-				new Table()
-					.setColumns([
-						{ name: "id", label: "ID", width: 4, color: Colours.GREEN },
-						{ name: "branch", label: "Branch", width: 60 },
-						{ name: "system", label: "System", width: 15 },
-						{ name: "summary", label: "Summary", width: 100 },
-					])
-					.setRows(tasks.map((task, i) => ({
-						id: i,
-						branch: task.branch,
-						system: task.system,
-						summary: task.summary,
-					})))
-					.setColour(Colours.GREEN)
-					.render()
-
-				// ask for the number of the task to run
-				const readline = require("readline")
-				let rl = readline.createInterface({
-					input: process.stdin, output: process.stdout,
-				})
-				rl.question("Enter the number of the task to run: ", (answer) => {
-					let taskToRun = tasks[parseInt(answer)]
-					let pr = new pullRequest(taskToRun.system, taskToRun.branch)
-					// set the task id so we can reference it when within the class
-					pr.taskId = `${taskToRun.id}`
-					// patch in the task plan to the solution if it's not empty
-					let solution = taskToRun.plan?.length > 0 ? taskToRun.solution + "\n**Actions followed:**\n\n" + taskToRun.plan : taskToRun.solution
-					// instantiate the prQuestions class
-					pr.prQuestions = new prQuestions({
-						purposeSummary: taskToRun.summary, purposeProblem: taskToRun.problem, purposeSolution: solution,
+				let questioner = new Questioner
+				questioner.showTableMenu("Select a task to run", columns, rows)
+					.then((selectedTask) => {
+						runTask(tasks[selectedTask])
 					})
-					rl.close()
-					// init the pullRequest class
-					pr.init()
-				})
 			} else {
 				console.log(`Usage: task <system>`)
 				process.exit(1)

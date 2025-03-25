@@ -6,8 +6,6 @@ const taskQuestions = require("./taskQuestions");
 const slimDB = require("@syrasco/slim-db/slimDB");
 const db = new slimDB("./data", process.env.TASK_DB_KEY, process.env.MODE);
 const { Questioner } = require("terminal-quizzer");
-const Table = require("./UI/table")
-const Colours = require("./UI/colours")
 
 /**
  * Represents a task builder and manages the process of creating a new task.
@@ -247,77 +245,23 @@ if (process.argv[2] === "list") {
 		.finally(() => {
 			if (tasksToRun) {
 				console.log(`${tasksToRunString}`);
+				let rows = tasks.map((task, i) => ({
+					id: i,
+					branch: task.branch,
+					system: task.system,
+					summary: task.summary,
+				}))
+				let columns = [
+					{name: "branch", label: "Branch", width: 70},
+					{name: "system", label: "System", width: 15},
+					{name: "summary", label: "Summary", width: 110},
+				]
 
-				new Table()
-					.setColumns([
-						{ name: "id", label: "ID", width: 4, color: Colours.GRAY },
-						{ name: "branch", label: "Branch", width: 60 },
-						{ name: "system", label: "System", width: 15 },
-						{ name: "summary", label: "Summary", width: 100 },
-					])
-					.setRows(tasks.map((task, i) => ({
-						id: i,
-						branch: task.branch,
-						system: task.system,
-						summary: task.summary,
-					})))
-					.setColour(Colours.CYAN)
-					.render()
-
-				let questioner = new Questioner();
-				questioner
-					.askQuestion("Enter the number of the task to view:")
-					.then((answer) => {
-						let taskToView = tasks[parseInt(answer)];
-						let instance = new taskBuilder(taskToView.system);
-						questioner
-							.askQuestion(
-								"What would you like to do with this task?\n\n[V] View task\n[S] Switch to task\n[D] Delete task\n\n"
-							)
-							.then((answer) => {
-								switch (answer) {
-									case "V":
-										console.log(`\nAction plan:`);
-										console.log(
-											`${questioner.CYAN}${taskToView.plan}${questioner.NORMAL}`
-										);
-										process.exit(1);
-										break;
-									case "S":
-										// stash and switch to the branch
-										console.log(
-											`stashing changes and switching to the ${taskToView.branch} branch\n`
-										);
-										exec(
-											`cd ${instance.gitProjectDirectory} && git stash`
-										);
-										exec(
-											`cd ${instance.gitProjectDirectory} && git checkout ${taskToView.branch}`
-										);
-										console.log(
-											`cd ${instance.gitProjectDirectory} && git checkout ${taskToView.branch}`
-										);
-										// view the task plan
-										console.log(`\nAction plan:`);
-										console.log(
-											`${questioner.CYAN}${taskToView.plan}${questioner.NORMAL}`
-										);
-										process.exit(1);
-										break;
-									case "D":
-										db.deleteData("tasks", {
-											id: taskToView.id,
-										}).then(() => process.exit(1));
-										break;
-
-									default:
-										console.log(
-											`${questioner.RED}Unknown command. Exiting${questioner.NORMAL}`
-										);
-										process.exit(1);
-								}
-							});
-					});
+				let questioner = new Questioner
+				questioner.showTableMenu("Select a task to run", columns, rows)
+					.then((selectedTask) => {
+						askQuestions(tasks[selectedTask])
+					})
 			} else {
 				console.log(`Usage: task <system>`);
 				process.exit(1);
