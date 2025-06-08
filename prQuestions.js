@@ -80,9 +80,9 @@ class prQuestions {
 	stageBranchMerged() {
 		let self = this
 
-		console.log(`${this.questioner.RED}Dependencies:${this.questioner.NORMAL}`)
+		let title = `${this.questioner.RED}Dependencies:${this.questioner.NORMAL}`
 		this.questioner
-			.showYesNoMenu("Has the target branch been merged into the branch?")
+			.showYesNoMenu("Has the target branch been merged into the branch?", title)
 			.then((answer) => {
 				if (answer === "y") {
 					self.branchMerged = "\t**Yes**"
@@ -141,10 +141,9 @@ class prQuestions {
 	stageIsBugFix() {
 		let self = this
 
-		console.log(`${this.questioner.RED}Bug Fix:${this.questioner.NORMAL}`)
-
+		let title = `${this.questioner.RED}Bug Fix:${this.questioner.NORMAL}`
 		this.questioner
-			.showYesNoMenu(`Is this a bug fix?`)
+			.showYesNoMenu(`Is this a bug fix?`, title)
 			.then((answer) => {
 				if (answer === "y") {
 					self.isBugFix = true
@@ -159,13 +158,14 @@ class prQuestions {
 	stageOtherPrs() {
 		let self = this
 
+		let title = `${this.questioner.RED}Linked PRs:${this.questioner.NORMAL}`
 		this.questioner
-			.showYesNoMenu("Are there any other PRs for other systems, e.g. My?")
+			.showYesNoMenu("Are there any linked PRs for other systems?", title)
 			.then((answer) => {
 				if (answer === "y") {
 					self.otherPrs = "\t**Yes**\n"
 					this.questioner
-						.askMultilineQuestion("list each other PR that depends on this PR", "\t- ")
+						.askMultilineQuestion("list each linked PR that depends on this PR", "\t- ")
 						.then((answer) => {
 							self.otherPrs += answer
 							self.quizzer.runStage("sqlUpdates")
@@ -231,8 +231,9 @@ class prQuestions {
 	stageSqlUpdates() {
 		let self = this
 
+		let title = `${this.questioner.RED}Linked DB updates:${this.questioner.NORMAL}`
 		this.questioner
-			.showYesNoMenu("Included SQL updates?")
+			.showYesNoMenu("Included DB updates?", title)
 			.then((answer) => {
 				if (answer === "y") {
 					self.sqlUpdates = "\t**Yes**"
@@ -247,13 +248,14 @@ class prQuestions {
 	stageSupportTicket() {
 		let self = this
 
+		let title = `${this.questioner.RED}Linked Tickets:${this.questioner.NORMAL}`
 		this.questioner
-			.showYesNoMenu("Is this pull request linked to a support ticket?")
+			.showYesNoMenu("Is this pull request linked to a ticket?", title)
 			.then((answer) => {
 				if (answer === "y") {
 					self.supportTicket = "\t**Yes**\n"
 					this.questioner
-						.askMultilineQuestion("list each support ticket related to this PR", "\t- ")
+						.askMultilineQuestion("list each ticket related to this PR", "\t- ")
 						.then((answer) => {
 							self.supportTicket += answer
 							self.quizzer.runStage("translations")
@@ -283,8 +285,9 @@ class prQuestions {
 	stageTranslations() {
 		let self = this
 
+		let title = `${this.questioner.RED}Translation changes:${this.questioner.NORMAL}`
 		this.questioner
-			.showYesNoMenu("Does this add/edit/remove any translations?")
+			.showYesNoMenu("Does this add/edit/remove any translations?", title)
 			.then((answer) => {
 				if (answer === "y") {
 					self.translations = "\t**Yes**"
