@@ -12,9 +12,9 @@
 	"author": "Shane Coates",
 	"license": "ISC",
 	"dependencies": {
-		"@syrasco/slim-db": "^1.1.4",
 		"dotenv": "^16.0.3",
 		"node-fetch": "^3.3.0",
+		"slimcryptdb": "^2.0.0",
 		"terminal-quizzer": "^1.0.0"
 	},
 	"repository": {

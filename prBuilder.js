@@ -5,10 +5,12 @@ const fs = require("fs")
 const prQuestions = require("./prQuestions")
 const setupQuestions = require("./setupQuestions")
 
-const slimDB = require("@syrasco/slim-db/slimDB")
+const { SlimCryptDB } = require("slimcryptdb")
 const Colours = require("./UI/colours")
 const { Questioner } = require("terminal-quizzer")
-const db = new slimDB("./data", process.env.TASK_DB_KEY, process.env.MODE)
+const db = new SlimCryptDB("./data", Buffer.from(process.env.TASK_DB_KEY, 'hex'), {
+	encrypt: process.env.ENCRYPT === "true",
+})
 
 /**
  * Represents a pull request and manages the process of creating one.
@@ -245,9 +247,10 @@ function runTask(taskToRun) {
  * - BITBUCKET_ACCOUNT_NAME
  * - GIT_PROJECT_DIR -- this includes a :system: wildcard pointing to your git
  *   project directory in the format: /path/to/your/project/:system:
- * - MODE -- determines whether the DB is encrypted (production) or not (local)
+ * - ENCRYPT -- determines whether the DB is encrypted or not
  * - TASK_DB_KEY -- the encryption key for the DB
  */
+
 if (!process.argv[2]) {
 	let tasks = []
 	let tasksToRun = 0

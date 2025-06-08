@@ -1,8 +1,10 @@
 const { Quizzer, Questioner } = require("terminal-quizzer")
 const fs = require("fs")
 
-const slimDB = require("@syrasco/slim-db/slimDB")
-const db = new slimDB("./data", process.env.TASK_DB_KEY, process.env.MODE)
+const { SlimCryptDB } = require("slimcryptdb")
+const db = new SlimCryptDB("./data", Buffer.from(process.env.TASK_DB_KEY, 'hex'), {
+	encrypt: process.env.ENCRYPT === "true",
+})
 
 class taskQuestions {
 	questioner = new Questioner()

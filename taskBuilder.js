@@ -3,8 +3,10 @@ const { exec } = require("child_process");
 const branchQuestions = require("./branchQuestions");
 const taskQuestions = require("./taskQuestions");
 
-const slimDB = require("@syrasco/slim-db/slimDB");
-const db = new slimDB("./data", process.env.TASK_DB_KEY, process.env.MODE);
+const { SlimCryptDB } = require("slimcryptdb")
+const db = new SlimCryptDB("./data", Buffer.from(process.env.TASK_DB_KEY, 'hex'), {
+	encrypt: process.env.ENCRYPT === "true",
+})
 const { Questioner } = require("terminal-quizzer");
 
 /**
@@ -226,7 +228,7 @@ function askQuestions(taskToView) {
  * - BITBUCKET_ACCOUNT_NAME
  * - GIT_PROJECT_DIR -- this includes a :system: wildcard pointing to your git
  *   project directory in the format: /path/to/your/project/:system:
- * - MODE -- determines whether the DB is encrypted (production) or not (local)
+ * - ENCRYPT -- determines whether the DB is encrypted or not
  * - TASK_DB_KEY -- the encryption key for the DB
  */
 if (process.argv[2] === "list") {
@@ -262,6 +264,7 @@ if (process.argv[2] === "list") {
 					.then((selectedTask) => {
 						askQuestions(tasks[selectedTask])
 					})
+					.finally(() => db.close())
 			} else {
 				console.log(`Usage: task <system>`);
 				process.exit(1);

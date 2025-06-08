@@ -1,7 +1,6 @@
-const crypto = require("crypto")
 const fs = require("fs")
 const { Quizzer, Questioner } = require("terminal-quizzer")
-const slimDB = require("@syrasco/slim-db/slimDB")
+const { SlimCryptDB, generateEncryptionKey } = require("slimcryptdb")
 
 class install {
 
@@ -14,7 +13,7 @@ class install {
 	questioner = null
 	quizzer = null
 	repositories = {}
-	mode = null
+	encrypt = true
 
 	// the stages available and the methods to call them
 	stages = {
@@ -37,8 +36,8 @@ class install {
 			+ `BITBUCKET_PR_APP_PASSWORD=${this.bitbucketAppPassword}\n`
 			+ `BITBUCKET_ACCOUNT_NAME=${this.bitbucketAccountName}\n`
 			+ `GIT_PROJECT_DIR=${this.projectDirectory}\n`
-			+ `MODE=${this.mode}\n`
-			+ `TASK_DB_KEY=${this.encryptionKey}`
+			+ `ENCRYPT=${this.encrypt}\n`
+			+ `TASK_DB_KEY=${this.encryptionKey.toString('hex')}\n`
 
 		fs.writeFileSync(".env", envFileContent)
 		console.log(
@@ -74,18 +73,13 @@ class install {
 		this.questioner
 			.showYesNoMenu("Do you want to encrypt the database?")
 			.then(async (answer) => {
-				const mode = answer === "y"
-					? "production"
-					: "local"
+				self.encrypt = answer === "y"
 
 				// Create a new random encryption key
-				self.encryptionKey = crypto.randomBytes(16).toString("hex")
+				self.encryptionKey = generateEncryptionKey()
 
 				// create a new db instance
-				const db = new slimDB("./data", self.encryptionKey, mode)
-
-				// store the mode on the instance so we can access it later
-				self.mode = mode
+				const db = new SlimCryptDB("./data", self.encryptionKey, self.encrypt)
 
 				// create the data directory if it doesn't exist
 				if (!fs.existsSync("./data")) {
