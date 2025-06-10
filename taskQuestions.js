@@ -1,10 +1,7 @@
 const { Quizzer, Questioner } = require("terminal-quizzer")
 const fs = require("fs")
 
-const { SlimCryptDB } = require("slimcryptdb")
-const db = new SlimCryptDB("./data", Buffer.from(process.env.TASK_DB_KEY, 'hex'), {
-	encrypt: process.env.ENCRYPT === "true",
-})
+const { initDB } = require("./Helper")
 
 class taskQuestions {
 	questioner = new Questioner()
@@ -143,7 +140,7 @@ class taskQuestions {
 			})
 	}
 
-	stageComplete() {
+	async stageComplete() {
 		// store the description in tmp-task-description.log so we have it
 		let tmpFile = "tmp-task-description.log"
 		let description = this.description
@@ -152,7 +149,10 @@ class taskQuestions {
 		fs.closeSync(descriptionFile)
 
 		// add the task to the database
-		db.addData("tasks", this.json).then(() => this.quizzer.end())
+		const db = await initDB()
+		await db.addData("tasks", this.json)
+		await db.close()
+		this.quizzer.end()
 	}
 }
 

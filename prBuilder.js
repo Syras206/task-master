@@ -1,16 +1,13 @@
-const env = require("dotenv").config({ path: "./.env" })
+require("dotenv").config({ path: "./.env" })
 const { exec } = require("child_process")
 const flowQuestions = require("./flowQuestions")
 const fs = require("fs")
 const prQuestions = require("./prQuestions")
 const setupQuestions = require("./setupQuestions")
 
-const { SlimCryptDB } = require("slimcryptdb")
+const { initDB } = require("./Helper")
 const Colours = require("./UI/colours")
 const { Questioner } = require("terminal-quizzer")
-const db = new SlimCryptDB("./data", Buffer.from(process.env.TASK_DB_KEY, 'hex'), {
-	encrypt: process.env.ENCRYPT === "true",
-})
 
 /**
  * Represents a pull request and manages the process of creating one.
@@ -94,18 +91,19 @@ class pullRequest {
 				console.log(`Response: ${response.status} ${response.statusText}`)
 				throw new Error(`${Colours.RED}Failed to create pull request in ${this.system}${Colours.NORMAL}\n`)
 			})
-			.then((json) => {
+			.then(async (json) => {
 				console.log(`${Colours.GREEN}PR successfully created${Colours.NORMAL}\n`)
 				console.log(`${Colours.CYAN}PR ID: ${json.id}${Colours.NORMAL}`)
 				console.log(`${Colours.CYAN}PR URL: ${json.links.html.href}${Colours.NORMAL}`)
 
 				// delete the task
 				if (self.taskId) {
-					db.deleteData("tasks", { id: self.taskId }).then(() => {
-						console.log("task removed")
-						// exit the program
-						process.exit(1)
-					})
+					const db = await initDB()
+					await db.deleteData("tasks", { id: self.taskId })
+					console.log("task removed")
+					// close the database
+					await db.close()
+					process.exit(1)
 				} else {
 					// exit the program
 					process.exit(1)
@@ -212,83 +210,41 @@ function runTask(taskToRun) {
 	pr.init()
 }
 
-/**
- * Command-line interface for creating pull requests using tasks stored in the DB, or manually creating a PR if the
- * branch name is supplied as an argument.
- *
- * Usage:
- * 1. Create a `repositoryMap.json` file in the root of your project with the
- *   following structure:
- *   {
- *       "main": "my-main-repo",
- *       "foo": "my-foo-repo",
- *       ...
- *   }
- *
- * 2. Add tasks to the DB using the `npm run task main` script.
- *
- * 3. Create a `customTests.json` file in the root of your project with the
- *   following structure:
- *   {
- *       "phpstan"
- *       "phpunit",
- *  	 ...
- *   }
- *
- * 4. run the script with the system name as an argument:
- *   `npm run pr` -- for the PR selection menu
- *   `npm run pr main my/Branch/Name` -- for a specific system and branch
- *
- * 5. Follow the prompts to create a pull request.
- *
- * Ensure you have the following environment variables set:
- * - BITBUCKET_PR_USERNAME
- * - BITBUCKET_PR_APP_PASSWORD
- * - BITBUCKET_ACCOUNT_NAME
- * - GIT_PROJECT_DIR -- this includes a :system: wildcard pointing to your git
- *   project directory in the format: /path/to/your/project/:system:
- * - ENCRYPT -- determines whether the DB is encrypted or not
- * - TASK_DB_KEY -- the encryption key for the DB
- */
+async function selectTasks() {
+	const db = await initDB();
+	const tasks = await db.readData("tasks");
+	// close the database
+	db.close()
+	const tasksToRun = tasks.length;
+	const tasksToRunString = tasks.length + " tasks";
+
+	if (tasksToRun) {
+		console.log(`${tasksToRunString}`)
+		let rows = tasks.map((task, i) => ({
+			id: i,
+			branch: task.branch,
+			system: task.system,
+			summary: task.summary,
+		}))
+		let columns = [
+			{name: "branch", label: "Branch", width: 70},
+			{name: "system", label: "System", width: 15},
+			{name: "summary", label: "Summary", width: 110},
+		]
+
+		let questioner = new Questioner
+		questioner.showTableMenu("Select a task to run", columns, rows)
+			.then((selectedTask) => {
+				runTask(tasks[selectedTask])
+			})
+	} else {
+		console.log(`Usage: task <system>`)
+		process.exit(1)
+	}
+}
 
 if (!process.argv[2]) {
-	let tasks = []
-	let tasksToRun = 0
-	let tasksToRunString = null
-
-	// see if we have any tasks available
-	db.readData("tasks")
-		.then((results) => {
-			tasks = results
-			tasksToRun = results.length
-			tasksToRunString = results.length + " tasks"
-		})
-		.catch(() => (tasksToRun = 0))
-		.finally(() => {
-			if (tasksToRun) {
-				console.log(`${tasksToRunString}`)
-				let rows = tasks.map((task, i) => ({
-					id: i,
-					branch: task.branch,
-					system: task.system,
-					summary: task.summary,
-				}))
-				let columns = [
-					{name: "branch", label: "Branch", width: 70},
-					{name: "system", label: "System", width: 15},
-					{name: "summary", label: "Summary", width: 110},
-				]
-
-				let questioner = new Questioner
-				questioner.showTableMenu("Select a task to run", columns, rows)
-					.then((selectedTask) => {
-						runTask(tasks[selectedTask])
-					})
-			} else {
-				console.log(`Usage: task <system>`)
-				process.exit(1)
-			}
-		})
+	selectTasks()
 } else {
 	let system = process.argv[2]
 	let branch = process.argv[3]

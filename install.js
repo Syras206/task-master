@@ -81,13 +81,16 @@ class install {
 				// create a new db instance
 				const db = new SlimCryptDB("./data", self.encryptionKey, self.encrypt)
 
+				// wait for the database to be ready
+				await db.ready()
+
 				// create the data directory if it doesn't exist
 				if (!fs.existsSync("./data")) {
 					fs.mkdirSync("./data")
 				}
 
 				// create the tasks table
-				db.createTable("tasks", {
+				await db.createTable("tasks", {
 					name: "tasks",
 					columns: [
 						{
@@ -129,10 +132,11 @@ class install {
 							keys: ["id"],
 						},
 					],
-				}).then(() => {
-					// db is ready, move to the next stage
-					self.quizzer.runStage("projects")
 				})
+				self.quizzer.runStage("projects")
+					.then(async () => {
+						await db.close()
+					})
 			})
 	}
 

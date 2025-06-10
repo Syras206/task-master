@@ -1,12 +1,9 @@
-const env = require("dotenv").config({ path: "./.env" });
+require("dotenv").config({ path: "./.env" });
 const { exec } = require("child_process");
 const branchQuestions = require("./branchQuestions");
 const taskQuestions = require("./taskQuestions");
 
-const { SlimCryptDB } = require("slimcryptdb")
-const db = new SlimCryptDB("./data", Buffer.from(process.env.TASK_DB_KEY, 'hex'), {
-	encrypt: process.env.ENCRYPT === "true",
-})
+const { initDB } = require("./Helper")
 const { Questioner } = require("terminal-quizzer");
 
 /**
@@ -110,26 +107,28 @@ class taskBuilder {
 		// ask for the branch details
 		this.branchQuestions.init().then(() => {
 			// create the branch and switch to it
-			self.createBranch().then(() => {
-				self.taskQuestions = new taskQuestions(
-					self.system,
-					self.branchQuestions.branchName
-				);
-				// start asking task questions
-				self.taskQuestions.init().then(() => {
-					// ensure we are checked out on the branch
-					exec(
-						`cd ${this.gitProjectDirectory} && git checkout ${this.branchQuestions.branchName}`
+			self.createBranch()
+				.then(() => {
+					self.taskQuestions = new taskQuestions(
+						self.system,
+						self.branchQuestions.branchName
 					);
-					// ready to go
-					console.log(
-						"Time to get going, open up arise or the forest app and start working!"
-					);
-					// list the tasks
-					console.table(self.taskQuestions.planTasks);
-					console.log("Don't forget, work smarter not faster!");
-				});
-			});
+					// start asking task questions
+					self.taskQuestions.init()
+						.then(() => {
+							// ensure we are checked out on the branch
+							exec(
+								`cd ${this.gitProjectDirectory} && git checkout ${this.branchQuestions.branchName}`
+							);
+							// ready to go
+							console.log(
+								"Time to get going!"
+							);
+							// list the tasks
+							console.table(self.taskQuestions.planTasks);
+							console.log("Don't forget, work smarter not faster!");
+						});
+				})
 		});
 	}
 }
@@ -179,11 +178,14 @@ function askQuestions(taskToView) {
 					break
 				case "D":
 					questioner.showYesNoMenu('Are you sure you want to delete this task?')
-						.then((answer) => {
+						.then(async (answer) => {
 							if (answer === 'y') {
-								db.deleteData("tasks", {
+								const db = await initDB();
+								await db.deleteData("tasks", {
 									id: taskToView.id,
-								}).then(() => process.exit(1))
+								})
+								await db.close()
+								process.exit(1)
 							} else {
 								`${questioner.RED}Exiting${questioner.NORMAL}`,
 								process.exit(1)
@@ -200,76 +202,40 @@ function askQuestions(taskToView) {
 		})
 }
 
-/**
- * Command-line interface for creating pull requests tasks and storing them in
- * the DB, or interacting with tasks stored in the DB.
- *
- * Usage:
- * 1. Create a `repositoryMap.json` file in the root of your project with the
- *   following structure:
- *   {
- *       "main": "my-main-repo",
- *       "foo": "my-foo-repo",
- *       ...
- *   }
- *
- * 2. Add tasks to the DB using the `npm run task main` script.
- *
- * 3. run the script with the system name as an argument:
- *   `npm run task` -- add a new PR task to the first system
- *   `npm run task main` -- for a specific system
- *   `npm run task list` -- list all tasks, and perform actions
- *
- * 4. Follow the prompts to create a pull request task.
- *
- * Ensure you have the following environment variables set:
- * - BITBUCKET_PR_USERNAME
- * - BITBUCKET_PR_APP_PASSWORD
- * - BITBUCKET_ACCOUNT_NAME
- * - GIT_PROJECT_DIR -- this includes a :system: wildcard pointing to your git
- *   project directory in the format: /path/to/your/project/:system:
- * - ENCRYPT -- determines whether the DB is encrypted or not
- * - TASK_DB_KEY -- the encryption key for the DB
- */
+async function listTasks() {
+	const db = await initDB();
+	const tasks = await db.readData("tasks");
+	await db.close()
+	const tasksToRun = tasks.length;
+	const tasksToRunString = tasks.length + " tasks";
+
+	if (tasksToRun) {
+		console.log(`${tasksToRunString}`);
+		let rows = tasks.map((task, i) => ({
+			id: i,
+			branch: task.branch,
+			system: task.system,
+			summary: task.summary,
+		}))
+		let columns = [
+			{name: "branch", label: "Branch", width: 70},
+			{name: "system", label: "System", width: 15},
+			{name: "summary", label: "Summary", width: 110},
+		]
+
+		let questioner = new Questioner
+		questioner.showTableMenu("Select a task to run", columns, rows)
+			.then((selectedTask) => {
+				askQuestions(tasks[selectedTask])
+			})
+	} else {
+		console.log(`Usage: task <system>`);
+		process.exit(1);
+	}
+}
+
 if (process.argv[2] === "list") {
-	let tasks = [];
-	let tasksToRun = 0;
-	let tasksToRunString = null;
-
-	// see if we have any tasks available
-	db.readData("tasks")
-		.then((results) => {
-			tasks = results;
-			tasksToRun = results.length;
-			tasksToRunString = results.length + " tasks";
-		})
-		.catch(() => (tasksToRun = 0))
-		.finally(() => {
-			if (tasksToRun) {
-				console.log(`${tasksToRunString}`);
-				let rows = tasks.map((task, i) => ({
-					id: i,
-					branch: task.branch,
-					system: task.system,
-					summary: task.summary,
-				}))
-				let columns = [
-					{name: "branch", label: "Branch", width: 70},
-					{name: "system", label: "System", width: 15},
-					{name: "summary", label: "Summary", width: 110},
-				]
-
-				let questioner = new Questioner
-				questioner.showTableMenu("Select a task to run", columns, rows)
-					.then((selectedTask) => {
-						askQuestions(tasks[selectedTask])
-					})
-					.finally(() => db.close())
-			} else {
-				console.log(`Usage: task <system>`);
-				process.exit(1);
-			}
-		});
+	listTasks()
 } else {
 	// get the system from the arguments
 	let system = process.argv[2];
