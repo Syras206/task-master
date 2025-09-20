@@ -120,7 +120,6 @@ class prQuestions {
 	stageComplete() {
 		// store the description in tmp-pr-description.log so we have it
 		let tmpFile = "tmp-pr-description.log"
-		console.log(this)
 		let description = this.description
 		let descriptionFile = fs.openSync(tmpFile, "w")
 		fs.writeSync(descriptionFile, description)
