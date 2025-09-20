@@ -23,7 +23,7 @@ Before you begin, ensure you have met the following requirements:
 
 1. Clone the repository:
     ```
-    git clone https://github.com/your-username/task-master.git
+    git clone https://github.com/Syras206/task-master.git
     cd task-master
     ```
    
