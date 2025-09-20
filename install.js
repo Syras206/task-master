@@ -134,9 +134,7 @@ class install {
 					],
 				})
 				self.quizzer.runStage("projects")
-					.then(async () => {
-						await db.close()
-					})
+				await db.close()
 			})
 	}
 
