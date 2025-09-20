@@ -125,7 +125,7 @@ class taskBuilder {
 								"Time to get going!"
 							);
 							// list the tasks
-							console.table(self.taskQuestions.planTasks);
+							console.table(self.taskQuestions.planTasks || self.taskQuestions.taskSolution);
 							console.log("Don't forget, work smarter not faster!");
 						});
 				})
@@ -151,7 +151,7 @@ function askQuestions(taskToView) {
 				case "V":
 					console.log(`\nAction plan:`)
 					console.log(
-						`${questioner.CYAN}${taskToView.plan}${questioner.NORMAL}`,
+						`${questioner.CYAN}${taskToView.plan || taskToView.solution}${questioner.NORMAL}`,
 					)
 					process.exit(1)
 					break
@@ -172,7 +172,7 @@ function askQuestions(taskToView) {
 					// view the task plan
 					console.log(`\nAction plan:`)
 					console.log(
-						`${questioner.CYAN}${taskToView.plan}${questioner.NORMAL}`,
+						`${questioner.CYAN}${taskToView.plan || taskToView.solution}${questioner.NORMAL}`,
 					)
 					process.exit(1)
 					break
