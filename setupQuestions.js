@@ -50,7 +50,7 @@ class setupQuestions {
 		this.questioner
 			.showYesNoMenu("Do tests need to be run now?")
 			.then((answer) => {
-				if (answer === "y") {
+				if (answer) {
 					self.runTesting = "y"
 					this.runTests.init().then(() => {
 						// test questions are complete

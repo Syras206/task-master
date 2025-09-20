@@ -73,7 +73,7 @@ class install {
 		this.questioner
 			.showYesNoMenu("Do you want to encrypt the database?")
 			.then(async (answer) => {
-				self.encrypt = answer === "y"
+				self.encrypt = answer
 
 				// Create a new random encryption key
 				self.encryptionKey = generateEncryptionKey()

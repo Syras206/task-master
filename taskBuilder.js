@@ -179,7 +179,7 @@ function askQuestions(taskToView) {
 				case "D":
 					questioner.showYesNoMenu('Are you sure you want to delete this task?')
 						.then(async (answer) => {
-							if (answer === 'y') {
+							if (answer) {
 								const db = await initDB();
 								await db.deleteData("tasks", {
 									id: taskToView.id,

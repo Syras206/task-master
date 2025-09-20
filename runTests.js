@@ -39,7 +39,7 @@ class runTests {
 				this.questioner
 					.showYesNoMenu(`Run '${test}'? ${this.questioner.CYAN}`)
 					.then((answer) => {
-						if (answer === "y") self.runTest(test)
+						if (answer) self.runTest(test)
 						self.runNextTest(tests)
 					})
 			} else {

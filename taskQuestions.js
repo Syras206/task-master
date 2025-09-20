@@ -104,9 +104,12 @@ class taskQuestions {
 		let self = this
 
 		this.questioner
-			.showYesNoMenu(`Are there any existing patterns for what you are trying to achieve in this task? i.e. Has this been done before?`)
+			.confirm({
+				message: "Are there any existing patterns for what you are trying to achieve in this task? i.e. Has this been done before?",
+				default: false,
+			})
 			.then((answer) => {
-				if (answer === "y") {
+				if (answer) {
 					this.questioner
 						.askMultilineQuestion(`Where has this been done before? What steps were taken to do it there?`)
 						.then((answer) => {

@@ -82,9 +82,13 @@ class prQuestions {
 
 		let title = `${this.questioner.RED}Dependencies:${this.questioner.NORMAL}`
 		this.questioner
-			.showYesNoMenu("Has the target branch been merged into the branch?", title)
+			.confirm({
+				message: "Has the target branch been merged into the branch?",
+				title: title,
+				default: true,
+			})
 			.then((answer) => {
-				if (answer === "y") {
+				if (answer) {
 					self.branchMerged = "\t**Yes**"
 					self.quizzer.runStage("otherPrs")
 				} else {
@@ -143,9 +147,13 @@ class prQuestions {
 
 		let title = `${this.questioner.RED}Bug Fix:${this.questioner.NORMAL}`
 		this.questioner
-			.showYesNoMenu(`Is this a bug fix?`, title)
+			.confirm({
+				message: "Is this a bug fix?",
+				title: title,
+				default: false,
+			})
 			.then((answer) => {
-				if (answer === "y") {
+				if (answer) {
 					self.isBugFix = true
 					self.quizzer.runStage("bugFixDetail")
 				} else {
@@ -160,9 +168,13 @@ class prQuestions {
 
 		let title = `${this.questioner.RED}Linked PRs:${this.questioner.NORMAL}`
 		this.questioner
-			.showYesNoMenu("Are there any linked PRs for other systems?", title)
+			.confirm({
+				message: "Are there any linked PRs for other systems?",
+				title: title,
+				default: false,
+			})
 			.then((answer) => {
-				if (answer === "y") {
+				if (answer) {
 					self.otherPrs = "\t**Yes**\n"
 					this.questioner
 						.askMultilineQuestion("list each linked PR that depends on this PR", "\t- ")
@@ -233,9 +245,13 @@ class prQuestions {
 
 		let title = `${this.questioner.RED}Linked DB updates:${this.questioner.NORMAL}`
 		this.questioner
-			.showYesNoMenu("Included DB updates?", title)
+			.confirm({
+				message: "Included DB updates?",
+				title: title,
+				default: false,
+			})
 			.then((answer) => {
-				if (answer === "y") {
+				if (answer) {
 					self.sqlUpdates = "\t**Yes**"
 					self.quizzer.runStage("supportTicket")
 				} else {
@@ -250,9 +266,13 @@ class prQuestions {
 
 		let title = `${this.questioner.RED}Linked Tickets:${this.questioner.NORMAL}`
 		this.questioner
-			.showYesNoMenu("Is this pull request linked to a ticket?", title)
+			.confirm({
+				message: "Is this pull request linked to a ticket?",
+				title: title,
+				default: false,
+			})
 			.then((answer) => {
-				if (answer === "y") {
+				if (answer) {
 					self.supportTicket = "\t**Yes**\n"
 					this.questioner
 						.askMultilineQuestion("list each ticket related to this PR", "\t- ")
@@ -287,9 +307,13 @@ class prQuestions {
 
 		let title = `${this.questioner.RED}Translation changes:${this.questioner.NORMAL}`
 		this.questioner
-			.showYesNoMenu("Does this add/edit/remove any translations?", title)
+			.confirm({
+				message: "Does this add/edit/remove any translations?",
+				title: title,
+				default: false,
+			})
 			.then((answer) => {
-				if (answer === "y") {
+				if (answer) {
 					self.translations = "\t**Yes**"
 					self.quizzer.runStage("complete")
 				} else {
