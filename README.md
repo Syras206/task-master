@@ -27,14 +27,9 @@ Before you begin, ensure you have met the following requirements:
     cd task-master
     ```
    
-2. Install the dependencies:
+2. Install the dependencies and run the install script, which will guide you through the installation in order to add the necessary files.
     ```
     npm install
-    ```
-
-3. Run the install script, which will guide you through the installation in order to add the necessary files.
-    ```
-    npm run install
     ```
 
 ## Usage
