@@ -20,6 +20,7 @@ class taskQuestions {
 		taskSolution: () => this.stageTaskSolution(),
 		existingPatterns: () => this.stageExistingPatterns(),
 		makePlan: () => this.stageMakePlan(),
+		makeStepByStepPlan: () => this.stageStepByStepPlan(),
 		complete: () => this.stageComplete(),
 	}
 
@@ -63,11 +64,11 @@ class taskQuestions {
 
 		console.log(`${this.questioner.NORMAL}Task:`)
 		console.log(`${this.questioner.CYAN}In this section we will concisely state what this task sets out to achieve, ask yourself why we need this change.${this.questioner.NORMAL}\n`)
-		console.log(`${this.questioner.CYAN}The task is broken down into a summary, a problem and a solution.${this.questioner.NORMAL}\n`)
+		console.log(`${this.questioner.CYAN}The task is broken down into a three parts: What we are changing, why we need the change and why this approach.${this.questioner.NORMAL}\n`)
 
-		console.log(`${this.questioner.CYAN}Summary:${this.questioner.NORMAL}`)
+		console.log(`${this.questioner.CYAN}What does this PR change?${this.questioner.NORMAL}`)
 		this.questioner
-			.askQuestion("Write a summary of the task. It is a short description of what the task does.")
+			.askQuestion("What's helpful to know that's changed? We can all read the diff but what difference do these changes actually make?")
 			.then((answer) => {
 				self.taskSummary = answer
 				self.quizzer.runStage("taskProblem")
@@ -77,7 +78,7 @@ class taskQuestions {
 	stageTaskProblem() {
 		let self = this
 
-		console.log(`${this.questioner.NORMAL}Problem:`)
+		console.log(`${this.questioner.NORMAL}Why was a change needed?`)
 
 		this.questioner
 			.askMultilineQuestion("Describe the problem this task sets out to solve. Explain why this task is needed.", "> \n> ~ ")
@@ -90,10 +91,10 @@ class taskQuestions {
 	stageTaskSolution() {
 		let self = this
 
-		console.log(`${this.questioner.NORMAL}Solution:`)
+		console.log(`${this.questioner.NORMAL}Why this approach?`)
 
 		this.questioner
-			.askMultilineQuestion("Describe the solution to the problem. This part justifies the approach you took.", "> \n> ~ ")
+			.askMultilineQuestion("Why was this solution chosen? What trade-offs or alternative were considered?", "> \n> ~ ")
 			.then((answer) => {
 				self.taskSolution = answer
 				self.quizzer.runStage("existingPatterns")
@@ -127,14 +128,35 @@ class taskQuestions {
 		let self = this
 
 		this.questioner
+			.confirm({
+				message: "Do you want to write out a step-by-step plan for exactly what needs doing for this task?",
+				default: false,
+			})
+			.then((answer) => {
+				if (answer) {
+					self.quizzer.runStage("makeStepByStepPlan")
+				} else {
+					self.plan = self.taskSolution
+					self.quizzer.runStage("complete")
+				}
+			})
+	}
+
+	stageStepByStepPlan() {
+		let self = this
+
+		this.questioner
 			.askMultilineQuestion("Write out a step-by-step plan for exactly what needs doing for this task.", "\t- ")
 			.then((answer) => {
 				self.plan = answer
 				// split the plan string into an array of plan tasks
-				self.planTasks = self.plan.split("\n").map(function(item) {
-					// remove the '\t-' prefix and any leading/trailing whitespace
-					return item.replace(/\t-/, "").trim()
-				})
+				self.planTasks = self.plan
+					.split("\n")
+					.map(function(item) {
+						// remove the '\t-' prefix and any leading/trailing whitespace
+						return item.replace(/\t-/, "").trim()
+					})
+					.filter(item => item.length > 0)
 				// loop through the plan tasks and remove the '-[] ' prefix
 				self.planTasks.forEach((planTask, index) => {
 					if (planTask.startsWith("-[] ")) self.planTasks.splice(index, 1)

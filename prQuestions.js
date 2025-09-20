@@ -44,10 +44,10 @@ class prQuestions {
 	}
 
 	get description() {
-		let description = "### Purpose\n> \n> " + this.purposeSummary
-			+ "\n> \n> :question: **Problem:**\n" + this.purposeProblem
-			+ "> \n> :star: **Solution:**\n" + this.purposeSolution + "\n\n"
-			+ "### Impact\n\n" + this.impact + "\n\n"
+		let description = "### Why was a change needed?\n\n" + this.purposeProblem + "\n\n"
+			+ "### What does this PR change?\n\n" + this.purposeSummary + "\n\n"
+			+ "### Why this approach?\n\n" + this.purposeSolution + "\n\n"
+			+ "### Where in the system is impacted by this change\n\n" + this.impact + "\n\n"
 
 		if (this.existingPatternDescription?.length > 0) {
 			description += "### There is an existing pattern to solve this task\n\n"
