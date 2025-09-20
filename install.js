@@ -89,50 +89,21 @@ class install {
 					fs.mkdirSync("./data")
 				}
 
+				const tasksSchema = {
+					type: 'object',
+					properties: {
+						id: { type: 'string' },
+						branch: { type: 'string', minLength: 1 },
+						system: { type: 'string', minLength: 1 },
+						summary: { type: 'string' },
+						problem: { type: 'string' },
+						solution: { type: 'string' },
+						plan: { type: 'string' }
+					}
+				};
+
 				// create the tasks table
-				await db.createTable("tasks", {
-					name: "tasks",
-					columns: [
-						{
-							name: "id",
-							type: "TEXT",
-						},
-						{
-							name: "branch",
-							type: "TEXT",
-						},
-						{
-							name: "system",
-							type: "TEXT",
-						},
-						{
-							name: "summary",
-							type: "TEXT",
-						},
-						{
-							name: "problem",
-							type: "TEXT",
-						},
-						{
-							name: "solution",
-							type: "TEXT",
-						},
-						{
-							name: "existingPattern",
-							type: "TEXT",
-						},
-						{
-							name: "plan",
-							type: "TEXT",
-						},
-					],
-					index: [
-						{
-							indexName: "id",
-							keys: ["id"],
-						},
-					],
-				})
+				await db.createTable("tasks", tasksSchema)
 				self.quizzer.runStage("projects")
 				await db.close()
 			})
